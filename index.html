@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DEAD HILLS - MISSION OBJECTIVES</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #000;
+            color: #00ff41;
+            font-family: 'Orbitron', monospace;
+            padding: 20px;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        .terminal {
+            max-width: 1000px;
+            margin: 0 auto;
+            border: 2px solid #00ff41;
+            padding: 30px;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+            position: relative;
+        }
+        
+        .terminal::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 255, 65, 0.03) 0px,
+                rgba(0, 255, 65, 0.03) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+        }
+        
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #00ff41;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2em;
+            letter-spacing: 8px;
+            font-weight: 900;
+            text-shadow: 0 0 10px #00ff41;
+            margin-bottom: 10px;
+        }
+        
+        .header .subline {
+            font-size: 0.9em;
+            letter-spacing: 3px;
+            opacity: 0.8;
+        }
+        
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            background: rgba(0, 255, 65, 0.1);
+            border: 1px solid #00ff41;
+            padding: 15px;
+            margin-bottom: 30px;
+            font-size: 0.85em;
+        }
+        
+        .status-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .status-label {
+            opacity: 0.7;
+            margin-bottom: 5px;
+        }
+        
+        .status-value {
+            font-weight: 700;
+            font-size: 1.2em;
+        }
+        
+        .objective-card {
+            border: 2px solid #00ff41;
+            margin-bottom: 20px;
+            background: rgba(0, 255, 65, 0.03);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .objective-card:hover {
+            background: rgba(0, 255, 65, 0.08);
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+        }
+        
+        .objective-card.completed {
+            border-color: #666;
+            opacity: 0.6;
+        }
+        
+        .objective-card.completed:hover {
+            background: rgba(100, 100, 100, 0.1);
+            box-shadow: 0 0 20px rgba(100, 100, 100, 0.2);
+        }
+        
+        .objective-card.active {
+            border-color: #ffff00;
+            box-shadow: 0 0 15px rgba(255, 255, 0, 0.3);
+        }
+        
+        .objective-card.active:hover {
+            background: rgba(255, 255, 0, 0.08);
+            box-shadow: 0 0 25px rgba(255, 255, 0, 0.4);
+        }
+        
+        .objective-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid #00ff41;
+            background: rgba(0, 255, 65, 0.05);
+        }
+        
+        .objective-card.completed .objective-header {
+            background: rgba(100, 100, 100, 0.1);
+            border-bottom-color: #666;
+        }
+        
+        .objective-card.active .objective-header {
+            background: rgba(255, 255, 0, 0.1);
+            border-bottom-color: #ffff00;
+        }
+        
+        .objective-number {
+            font-size: 1.5em;
+            font-weight: 900;
+            min-width: 100px;
+        }
+        
+        .objective-title {
+            flex-grow: 1;
+            font-size: 1.2em;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        
+        .objective-status {
+            font-size: 0.9em;
+            padding: 5px 15px;
+            border: 1px solid;
+            border-radius: 3px;
+            font-weight: 700;
+        }
+        
+        .status-pending {
+            border-color: #00ff41;
+            color: #00ff41;
+        }
+        
+        .status-active {
+            border-color: #ffff00;
+            color: #ffff00;
+            background: rgba(255, 255, 0, 0.1);
+        }
+        
+        .status-complete {
+            border-color: #666;
+            color: #666;
+        }
+        
+        .objective-body {
+            padding: 20px;
+        }
+        
+        .objective-description {
+            margin-bottom: 15px;
+            line-height: 1.8;
+        }
+        
+        .objective-details {
+            background: rgba(0, 0, 0, 0.3);
+            border-left: 3px solid #00ff41;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        
+        .objective-card.completed .objective-details {
+            border-left-color: #666;
+        }
+        
+        .objective-card.active .objective-details {
+            border-left-color: #ffff00;
+        }
+        
+        .detail-row {
+            display: flex;
+            margin-bottom: 8px;
+        }
+        
+        .detail-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .detail-label {
+            font-weight: 700;
+            min-width: 120px;
+            opacity: 0.8;
+        }
+        
+        .priority-critical {
+            color: #ff4400;
+            font-weight: 900;
+        }
+        
+        .priority-high {
+            color: #ffff00;
+            font-weight: 700;
+        }
+        
+        .priority-standard {
+            color: #00ff41;
+        }
+        
+        .divider {
+            height: 2px;
+            background: linear-gradient(to right, transparent, #00ff41, transparent);
+            margin: 30px 0;
+        }
+        
+        .blink {
+            animation: blink 1.5s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0; }
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #00ff41;
+            font-size: 0.8em;
+            opacity: 0.6;
+        }
+        
+        .flicker {
+            animation: flicker 3s infinite;
+        }
+        
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            41.99% { opacity: 1; }
+            42% { opacity: 0.8; }
+            43% { opacity: 1; }
+            45.99% { opacity: 1; }
+            46% { opacity: 0.7; }
+            46.5% { opacity: 1; }
+        }
+        
+        .note-box {
+            border: 1px solid #ffff00;
+            background: rgba(255, 255, 0, 0.05);
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .note-title {
+            color: #ffff00;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .section-header {
+            font-size: 1.5em;
+            font-weight: 700;
+            text-align: center;
+            padding: 15px;
+            background: rgba(0, 255, 65, 0.1);
+            border: 1px solid #00ff41;
+            margin-bottom: 25px;
+            letter-spacing: 3px;
+        }
+        
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .terminal {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 1.3em;
+                letter-spacing: 4px;
+            }
+            
+            .header .subline {
+                font-size: 0.7em;
+                letter-spacing: 2px;
+            }
+            
+            .status-bar {
+                flex-wrap: wrap;
+                gap: 10px;
+                padding: 10px;
+            }
+            
+            .status-item {
+                flex: 1 1 45%;
+                min-width: 120px;
+            }
+            
+            .status-label {
+                font-size: 0.8em;
+            }
+            
+            .status-value {
+                font-size: 1em;
+            }
+            
+            .section-header {
+                font-size: 1.1em;
+                letter-spacing: 2px;
+                padding: 10px;
+            }
+            
+            .objective-header {
+                flex-wrap: wrap;
+                gap: 10px;
+                padding: 12px;
+            }
+            
+            .objective-number {
+                font-size: 1.2em;
+                min-width: 80px;
+            }
+            
+            .objective-title {
+                font-size: 1em;
+                flex: 1 1 100%;
+                order: 2;
+            }
+            
+            .objective-status {
+                font-size: 0.8em;
+                padding: 4px 10px;
+                order: 1;
+            }
+            
+            .objective-body {
+                padding: 12px;
+            }
+            
+            .objective-description {
+                font-size: 0.9em;
+                line-height: 1.6;
+            }
+            
+            .objective-details {
+                padding: 10px;
+                margin-top: 10px;
+            }
+            
+            .detail-row {
+                flex-direction: column;
+                margin-bottom: 10px;
+            }
+            
+            .detail-label {
+                min-width: auto;
+                margin-bottom: 3px;
+                font-size: 0.85em;
+            }
+            
+            .note-box {
+                padding: 12px;
+                font-size: 0.9em;
+            }
+            
+            .note-title {
+                font-size: 0.95em;
+            }
+            
+            .footer {
+                font-size: 0.7em;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.1em;
+                letter-spacing: 3px;
+            }
+            
+            .status-item {
+                flex: 1 1 100%;
+            }
+            
+            .objective-number {
+                font-size: 1em;
+                min-width: 70px;
+            }
+            
+            .objective-title {
+                font-size: 0.9em;
+            }
+            
+            .section-header {
+                font-size: 1em;
+                letter-spacing: 1px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="terminal flicker">
+        <div class="header">
+            <h1>MISSION OBJECTIVES</h1>
+            <div class="subline">DEAD HILLS COLONY OPERATION</div>
+            <div class="subline">SEARCH AND RESCUE PROTOCOLS</div>
+        </div>
+        
+        <div class="status-bar">
+            <div class="status-item">
+                <div class="status-label">MISSION STATUS</div>
+                <div class="status-value" style="color: #ffff00;"><span class="blink">ACTIVE</span></div>
+            </div>
+            <div class="status-item">
+                <div class="status-label">OBJECTIVES</div>
+                <div class="status-value" id="objectives-counter">0 / 14</div>
+            </div>
+            <div class="status-item">
+                <div class="status-label">SURVIVORS LOCATED</div>
+                <div class="status-value" id="survivors-counter">0</div>
+            </div>
+            <div class="status-item">
+                <div class="status-label">THREAT LEVEL</div>
+                <div class="status-value" style="color: #ff4400;">UNASSESSED</div>
+            </div>
+        </div>
+        
+        <div class="note-box">
+            <div class="note-title">⚠ OPERATIONAL NOTICE</div>
+            Objectives may be completed in any order unless dependencies exist. Situation is fluid - adapt as necessary. Prioritize Marine safety and civilian extraction. Additional objectives may be assigned as situation develops.
+        </div>
+        
+        <div class="divider"></div>
+        
+        <div class="section-header">PRIMARY OBJECTIVES</div>
+        
+        <!-- OBJECTIVE 1 -->
+        <div class="objective-card active" data-objective="1" data-status="active" data-survivor="false" onclick="cycleStatus(this)">
+            <div class="objective-header">
+                <div class="objective-number">OBJ-01</div>
+                <div class="objective-title">ENTER DEAD HILLS</div>
+                <div class="objective-status status-active">ACTIVE</div>
+            </div>
+            <div class="objective-body">
+                <div class="objective-description">
+                    Gain entry to Dead Hills colony through perimeter gate. Establish initial foothold and assess immediate area for threats. Perimeter security protocols must be overridden to allow ARC deployment and team insertion.
+                </div>
+                <div class="objective-details">
+                    <div class="detail-row">
+                        <div class="detail-label">PRIORITY:</div>
+                        <div class="priority-critical">CRITICAL</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">LOCATION:</div>
+                        <div>Main Gate - Colony Perimeter</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">REQUIREMENTS:</div>
+                        <div>Terminal access / Security override</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- OBJECTIVE 2 -->
+        <div class="objective-card" data-objective="2" data-status="pending" data-survivor="false" onclick="cycleStatus(this)">
+            <div class="objective-header">
+                <div class="objective-number">OBJ-02</div>
+                <div class="objective-title">REACTIVATE THE COLONY'S SATCOM</div>
+                <div class="objective-status status-pending">PENDING</div>
+            </div>
+            <div class="objective-body">
+                <div class="objective-description">
+                    Restore satellite communications array to full operational status. This will enable Hayes to access colony systems, track survivor PDT signals, and maintain command link with Otago. Communications blackout must be resolved before full assessment possible.
+                </div>
+                <div class="objective-details">
+                    <div class="detail-row">
+                        <div class="detail-label">PRIORITY:</div>
+                        <div class="priority-critical">CRITICAL</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">LOCATION:</div>
+                        <div>SatCom Room - Ground Level</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">REQUIREMENTS:</div>
+                        <div>COMTECH skill / System restoration</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">UNLOCKS:</div>
+                        <div>Survivor tracking / System access</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- OBJECTIVE 3 -->
+        <div class="objective-card" data-objective="3" data-status="pending" data-survivor="false" onclick="cycleStatus(this)">
+            <div class="objective-header">
+                <div class="objective-number">OBJ-03</div>
+                <div class="objective-title">DEACTIVATE THE EMERGENCY LOCKDOWN</div>
+                <div class="objective-status status-pending">PENDING</div>
+            </div>
+            <div class="objective-body">
+                <div class="objective-description">
+                    Override colony-wide emergency lockdown from Township HQ command center. Current protocols have sealed multiple access points and disabled automated systems. Deactivation required for full colony access and survivor extraction operations.
+                </div>
+                <div class="objective-details">
+                    <div class="detail-row">
+                        <div class="detail-label">PRIORITY:</div>
+                        <div class="priority-critical">CRITICAL</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">LOCATION:</div>
+                        <div>Command Room - Level 1</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">REQUIREMENTS:</div>
+                        <div>Access to Level 1 / Command terminal</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">UNLOCKS:</div>
+                        <div>Full colony access / Door systems</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="divider"></div>
+        <div class="section-header">SURVIVOR EXTRACTION OBJECTIVES</div>
+        
+        <!-- OBJECTIVE 4 -->
+        <div class="objective-card" data-objective="4" data-status="pending" data-survivor="true" onclick="cycleStatus(this)">
+            <div class="objective-header">
+                <div class="objective-number">OBJ-04</div>
+                <div class="objective-title">SAVE ENGINEER MACALLAN</div>
+                <div class="objective-status status-pending">PENDING</div>
+            </div>
+            <div class="objective-body">
+                <div class="objective-description">
+                    Locate and extract Engineer Macallan from sealed room. PDT signal indicates survivor is alive but barricaded. Individual may be traumatized - approach with caution. Possess technical skills that may prove useful for mission objectives.
+                </div>
+                <div class="objective-details">
+                    <div class="detail-row">
+                        <div class="detail-label">PRIORITY:</div>
+                        <div class="priority-high">HIGH</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">LOCATION:</div>
+                        <div>Ground Level - Eastern Section</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">STATUS:</div>
+                        <div>PDT Active / Alive</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">SPECIALIST:</div>
+                        <div>Engineering / Technical Systems</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- OBJECTIVE 5 -->
+        <div class="objective-card" data-objective="5" data-status="pending" data-survivor="true" onclick="cycleStatus(this)">
+            <div class="objective-header">
+                <div class="objective-number">OBJ-05</div>
+                <div class="objective-title">SAVE ENGINEER O'NEIL</div>
+                <div class="objective-status status-pending">PENDING</div>
+            </div>
+            <div class="objective-body">
+                <div class="objective-description">
+                    Investigate Engineer O'Neil's PDT signal location. Last known position in medical area, Level 1. Status uncertain - signal weak but present. Assess survivor condition and render medical aid if possible. Extract if viable.
+                </div>
+                <div class="objective-details">
+                    <div class="detail-row">
+                        <div class="detail-label">PRIORITY:</div>
+                        <div class="priority-high">HIGH</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">LOCATION:</div>
+                        <div>Level 1 - Medical Wing</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">STATUS:</div>
+                        <div>PDT Active / Condition Unknown</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">SPECIALIST:</div>
+                        <div>Engineering / Maintenance</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- OBJECTIVE 6 -->
+        <div class="objective-card" data-objective="6" data-status="pending" data-survivor="true" onclick="cycleStatus(this)">
+            <div class="objective-header">
+                <div class="objective-number">OBJ-06</div>
+                <div class="objective-title">SAVE SECURITY GUARD TORRANCE</div>
+                <div class="objective-status status-pending">PENDING</div>
+            </div>
+            <div class="objective-body">
+                <div class="objective-description">
+                    Locate Security Guard Torrance in jail cell area. PDT signal strong - survivor likely secured in holding cells. Possess security clearances and knowledge of colony defense systems that may assist operations. Priority extraction.
+                </div>
+                <div class="objective-details">
+                    <div class="detail-row">
+                        <div class="detail-label">PRIORITY:</div>
+                        <div class="priority-high">HIGH</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">LOCATION:</div>
+                        <div>Jail Cells - Ground Level</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">STATUS:</div>
+                        <div>PDT Active / Secured Location</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">SPECIALIST:</div>
+                        <div>Security Systems / Colony Defense</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- OBJECTIVE 7 -->
+        <div class="objective-card" data-objective="7" data-status="pending" data-survivor="true" onclick="cycleStatus(this)">
+            <div class="objective-header">
+                <div class="objective-number">OBJ-07</div>
+                <div class="objective-title">SAVE VETERINARIAN McNEIL</div>
+                <div class="objective-status status-pending">PENDING</div>
+            </div>
+            <div class="objective-body">
+                <div class="objective-description">
+                    Extract Veterinarian McNeil from sealed veterinary clinic. PDT indicates survivor is alive and in secured airlock area. Possess medical training and biological expertise. Exercise caution with decontamination systems during extraction.
+                </div>
+                <div class="objective-details">
+                    <div class="detail-row">
+                        <div class="detail-label">PRIORITY:</div>
+                        <div class="priority-high">HIGH</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">LOCATION:</div>
+                        <div>Veterinary Clinic - Ground Level</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">STATUS:</div>
+                        <div>PDT Active / Sealed Environment</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">SPECIALIST:</div>
+                        <div>Medical / Biological Sciences</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- OBJECTIVE 8 -->
+        <div class="objective-card" data-objective="8" data-status="pending" data-survivor="true" onclick="cycleStatus(this)">
+            <div class="objective-header">
+                <div class="objective-number">OBJ-08</div>
+                <div class="objective-title">SAVE TECHNICIAN CARMICHAEL</div>
+                <div class="objective-status status-pending">PENDING</div>
+            </div>
+            <div class="objective-body">
+                <div class="objective-description">
+                    Locate Technician Carmichael in northeastern building complex. PDT signal active but stationary for extended period. Assess survivor condition. Technical specialist with maintenance expertise - valuable for colony systems restoration.
+                </div>
+                <div class="objective-details">
+                    <div class="detail-row">
+                        <div class="detail-label">PRIORITY:</div>
+                        <div class="priority-high">HIGH</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">LOCATION:</div>
+                        <div>Northeast Building - Ground Level</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">STATUS:</div>
+                        <div>PDT Active / No Movement</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">SPECIALIST:</div>
+                        <div>Maintenance / Technical Systems</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- OBJECTIVE 10 -->
+        <div class="objective-card" data-objective="10" data-status="pending" data-survivor="true" onclick="cycleStatus(this)">
+            <div class="objective-header">
+                <div class="objective-number">OBJ-10</div>
+                <div class="objective-title">SAVE BIOLOGIST EVERLY</div>
+                <div class="objective-status status-pending">PENDING</div>
+            </div>
+            <div class="objective-body">
+                <div class="objective-description">
+                    Investigate Biologist Everly's PDT location in northern building complex. Scientific specialist with research background. Status uncertain - approach with standard rescue protocols. May have valuable information about colony situation.
+                </div>
+                <div class="objective-details">
+                    <div class="detail-row">
+                        <div class="detail-label">PRIORITY:</div>
+                        <div class="priority-high">HIGH</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">LOCATION:</div>
+                        <div>Northern Complex - Ground Level</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">STATUS:</div>
+                        <div>PDT Active / Location Confirmed</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">SPECIALIST:</div>
+                        <div>Biology / Research Science</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="divider"></div>
+        <div class="section-header">INVESTIGATION OBJECTIVES</div>
+        
+        <!-- OBJECTIVE 9 -->
+        <div class="objective-card" data-objective="9" data-status="pending" data-survivor="false" onclick="cycleStatus(this)">
+            <div class="objective-header">
+                <div class="objective-number">OBJ-09</div>
+                <div class="objective-title">FIND THE SOURCE OF THE INFESTATION</div>
+                <div class="objective-status status-pending">PENDING</div>
+            </div>
+            <div class="objective-body">
+                <div class="objective-description">
+                    Determine origin point of colony emergency. Access surveillance systems to identify what triggered lockdown protocols. Investigation critical for understanding threat and preventing recurrence. Command requires comprehensive report.
+                </div>
+                <div class="objective-details">
+                    <div class="detail-row">
+                        <div class="detail-label">PRIORITY:</div>
+                        <div class="priority-critical">CRITICAL</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">LOCATION:</div>
+                        <div>Server Room / Surveillance Hub</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">REQUIREMENTS:</div>
+                        <div>System access / Investigation</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">UNLOCKS:</div>
+                        <div>Source location / Threat assessment</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- OBJECTIVE 11 -->
+        <div class="objective-card" data-objective="11" data-status="pending" data-survivor="false" onclick="cycleStatus(this)">
+            <div class="objective-header">
+                <div class="objective-number">OBJ-11</div>
+                <div class="objective-title">INVESTIGATE THE SUSPICIOUS CONTAINER</div>
+                <div class="objective-status status-pending">PENDING</div>
+            </div>
+            <div class="objective-body">
+                <div class="objective-description">
+                    Surveillance feeds indicate anomalous container in Slaughterhouse facility. Investigate container origin and contents. May be connected to colony emergency. Exercise extreme caution - area shows signs of significant disturbance.
+                </div>
+                <div class="objective-details">
+                    <div class="detail-row">
+                        <div class="detail-label">PRIORITY:</div>
+                        <div class="priority-high">HIGH</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">LOCATION:</div>
+                        <div>Slaughterhouse - Main Processing Room</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">REQUIREMENTS:</div>
+                        <div>Objective 09 completion / Access route</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">WARNING:</div>
+                        <div style="color: #ff4400;">High threat area - proceed with caution</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- OBJECTIVE 12 -->
+        <div class="objective-card" data-objective="12" data-status="pending" data-survivor="false" onclick="cycleStatus(this)">
+            <div class="objective-header">
+                <div class="objective-number">OBJ-12</div>
+                <div class="objective-title">FIND MATERIALS FOR THE OTAGO</div>
+                <div class="objective-status status-pending">PENDING</div>
+            </div>
+            <div class="objective-body">
+                <div class="objective-description">
+                    Locate and secure critical supplies for Otago operations. Intelligence suggests stockpiled resources in colony warehouses and storage facilities. Materials will support extended operations and survivor care. Secondary priority but valuable.
+                </div>
+                <div class="objective-details">
+                    <div class="detail-row">
+                        <div class="detail-label">PRIORITY:</div>
+                        <div class="priority-standard">STANDARD</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">LOCATION:</div>
+                        <div>Warehouse / Power Complex</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">REQUIREMENTS:</div>
+                        <div>Investigation / Cargo recovery</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">YIELD:</div>
+                        <div>Medical supplies / Equipment / Ammunition</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="divider"></div>
+        <div class="section-header">SECONDARY OBJECTIVES</div>
+        
+        <!-- OBJECTIVE 13 -->
+        <div class="objective-card" data-objective="13" data-status="pending" data-survivor="false" onclick="cycleStatus(this)">
+            <div class="objective-header">
+                <div class="objective-number">OBJ-13</div>
+                <div class="objective-title">FIND THE COLONISTS IN THE OLD MINE</div>
+                <div class="objective-status status-pending">PENDING</div>
+            </div>
+            <div class="objective-body">
+                <div class="objective-description">
+                    Multiple colonist PDT signals detected in old mining complex beneath colony. Investigation required. Colonists may have sought refuge in deep mining tunnels. Access via mine elevator system. Prepare for underground operations.
+                </div>
+                <div class="objective-details">
+                    <div class="detail-row">
+                        <div class="detail-label">PRIORITY:</div>
+                        <div class="priority-high">HIGH</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">LOCATION:</div>
+                        <div>Mines Level -1 / Deep Tunnels</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">REQUIREMENTS:</div>
+                        <div>Mine access / Underground operations</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">WARNING:</div>
+                        <div style="color: #ff4400;">Unstable shafts - hazardous environment</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- OBJECTIVE 14 -->
+        <div class="objective-card" data-objective="14" data-status="pending" data-survivor="true" onclick="cycleStatus(this)">
+            <div class="objective-header">
+                <div class="objective-number">OBJ-14</div>
+                <div class="objective-title">SAVE VETERINARIAN T. McNEIL</div>
+                <div class="objective-status status-pending">PENDING</div>
+            </div>
+            <div class="objective-body">
+                <div class="objective-description">
+                    Secondary PDT signal identified for Veterinarian McNeil in deep mine system. Signal separated from primary location. Investigate discrepancy. May indicate survivor movement or equipment malfunction. Assessment required.
+                </div>
+                <div class="objective-details">
+                    <div class="detail-row">
+                        <div class="detail-label">PRIORITY:</div>
+                        <div class="priority-high">HIGH</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">LOCATION:</div>
+                        <div>Mines Level -1 - Deep Section</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">STATUS:</div>
+                        <div>PDT Active / Location Anomalous</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">REQUIREMENTS:</div>
+                        <div>Objective 13 progress / Deep mine access</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="divider"></div>
+        
+        <div class="note-box">
+            <div class="note-title">OPERATIONAL GUIDELINES</div>
+            <div style="margin-top: 10px; line-height: 1.8;">
+                <strong>PRIORITY SYSTEM:</strong><br>
+                • <span class="priority-critical">CRITICAL</span> - Mission essential / Time sensitive<br>
+                • <span class="priority-high">HIGH</span> - Important for mission success<br>
+                • <span class="priority-standard">STANDARD</span> - Beneficial but not essential<br>
+                <br>
+                <strong>SURVIVOR EXTRACTION:</strong><br>
+                All rescued colonists must be transported to ARC for secure extraction. PDT signals will update as survivors are located and secured. Medical assessment required for all extracted personnel.
+                <br><br>
+                <strong>ADAPTIVE OPERATIONS:</strong><br>
+                Mission parameters may change based on field discoveries. Additional objectives may be assigned. Maintain communication with Deputy Hayes for real-time updates and tactical support.
+            </div>
+        </div>
+        
+        <div class="footer">
+            UNITED STATES COLONIAL MARINES<br>
+            MISSION OPERATIONS TERMINAL<br>
+            <br>
+            OBJECTIVES TRACKING: ACTIVE<br>
+            LAST UPDATE: MISSION START<br>
+            <br>
+            <span class="blink">_</span>
+        </div>
+    </div>
+    
+    <script>
+        // Cycle through statuses: pending -> active -> completed -> pending
+        function cycleStatus(card) {
+            const currentStatus = card.dataset.status;
+            const statusElement = card.querySelector('.objective-status');
+            const isSurvivor = card.dataset.survivor === 'true';
+            
+            let newStatus;
+            if (currentStatus === 'pending') {
+                newStatus = 'active';
+            } else if (currentStatus === 'active') {
+                newStatus = 'completed';
+            } else {
+                newStatus = 'pending';
+            }
+            
+            // Update card status
+            card.dataset.status = newStatus;
+            
+            // Remove all status classes
+            card.classList.remove('active', 'completed');
+            statusElement.classList.remove('status-pending', 'status-active', 'status-complete');
+            
+            // Apply new status
+            if (newStatus === 'active') {
+                card.classList.add('active');
+                statusElement.classList.add('status-active');
+                statusElement.textContent = 'ACTIVE';
+            } else if (newStatus === 'completed') {
+                card.classList.add('completed');
+                statusElement.classList.add('status-complete');
+                statusElement.textContent = 'COMPLETE';
+            } else {
+                statusElement.classList.add('status-pending');
+                statusElement.textContent = 'PENDING';
+            }
+            
+            // Update counters
+            updateCounters();
+        }
+        
+        function updateCounters() {
+            const allCards = document.querySelectorAll('.objective-card');
+            let completed = 0;
+            let survivors = 0;
+            
+            allCards.forEach(card => {
+                if (card.dataset.status === 'completed') {
+                    completed++;
+                    if (card.dataset.survivor === 'true') {
+                        survivors++;
+                    }
+                }
+            });
+            
+            document.getElementById('objectives-counter').textContent = `${completed} / 14`;
+            document.getElementById('survivors-counter').textContent = survivors;
+        }
+    </script>
+</body>
+</html>
+                
